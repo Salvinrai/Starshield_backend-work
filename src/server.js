@@ -22,8 +22,8 @@ const dauth = require('./middleware/dauth');
 require('./db/connect');
 
 //-----------------------------models to aquire for schema---------------------
-const School_R = require("./models/School");
-const Student_R = require("./models/Indivisual");
+const Organisation = require("./models/organisation");
+const User = require("./models/Indivisual");
 
 // ------------------------extended requiremnts------------------
 const async = require('hbs/lib/async');
@@ -74,7 +74,7 @@ app.get('/', (req,res)=>{
 });
 
 // deserialization---work - for -- working module
-//------------------- logout work for School--------------
+//------------------- logout work for organisation--------------
 app.get('/logout', auth , async(req,res) =>{
   try {
        req.curruser.tokens = req.curruser.tokens.filter((currElement) => {
@@ -89,7 +89,7 @@ app.get('/logout', auth , async(req,res) =>{
     res.status(500).send(error);
   }
 });
-//------------------- logout work for Student--------------
+//------------------- logout work for Indivisuals--------------
 app.get('/logoutd', dauth , async(req,res) =>{
   try {
        req.currdoctor.tokens = req.currdoctor.tokens.filter((currElement) => {
@@ -109,15 +109,15 @@ app.get('/logoutd', dauth , async(req,res) =>{
 
 // ------------------server ------register paths **end**------------------------------
 
-// creating a new database for School registration===> in database
-app.post('/register_S', async(req,res)=>{  // register_S for school to redirect
+// creating a new database for Organisation registration===> in database
+app.post('/register_O', async(req,res)=>{  // register_O for organisation to redirect
   try{
-      const SchoolRegister = new School_R({
+      const organisation_register = new Organisation({
        // name : req.body.pname, to be set as per the data
        
       })
 
-      const token =await SchoolRegister.generateAuthToken();
+      const token =await organisation_register.generateAuthToken();
       console.log('the token part'+ token);
       
       res.cookie('jwt',token,{
@@ -127,23 +127,23 @@ app.post('/register_S', async(req,res)=>{  // register_S for school to redirect
 
       console.log(cookie);
 
-    const regiatered = await SchoolRegister.save();
-    res.status(201).render('School_page'); //school page for the entry after login
+    const regiatered = await Organisation.save();
+    res.status(201).render('Organisation_page'); //organisation page for the entry after login
   }
   catch(error){
       res.status(400).send(error);
 
   }
 })
-// creating a new database for Student registration===> in database
-app.post('/register_I', async(req,res)=>{ // register_I for student Indivisuals to redirect
+// creating a new database for User registration===> in database
+app.post('/register_U', async(req,res)=>{ // register_U for User Indivisuals to redirect
    try{
-       const StudentRegister = new Student_R({
+       const UserRegister = new User({
         // name : req.body.pname, to be set as per the data
         
        })
 
-       const token =await StudentRegister.generateAuthToken();
+       const token =await UserRegister.generateAuthToken();
        console.log('the token part'+ token);
        
        res.cookie('jwtd',token,{
@@ -153,20 +153,20 @@ app.post('/register_I', async(req,res)=>{ // register_I for student Indivisuals 
  
        console.log(cookie);
 
-     const regiatered = await StudentRegister.save();
-     res.status(201).render('StudentPage'); //student page-------
+     const regiatered = await UserRegister.save();
+     res.status(201).render('indivisuals'); //USER page-------
    }
    catch(error){
        res.status(400).send(error);
 
    }
 })
-// checking School login--------------> from database ------------------
-app.post('/School', async(req,res)=>{ //school redirecct for login of school
+// checking Organisation login--------------> from database ------------------
+app.post('/org', async(req,res)=>{ //org redirecct for login of school
    try{
          const email =req.body.email;
          const password =req.body.password;
-    const useremail = await School_R.findOne({email:email});
+    const useremail = await Organisation.findOne({email:email});
 
     const isMatch = await bcrypt.compare(password, useremail.password);
     
@@ -182,7 +182,7 @@ app.post('/School', async(req,res)=>{ //school redirecct for login of school
 
 
     if(isMatch){
-        res.status(202).render('School');
+        res.status(202).render('organisation');
        
              
    }
@@ -195,12 +195,12 @@ app.post('/School', async(req,res)=>{ //school redirecct for login of school
      res.status(404).send("invalid login details");
     }
    });
-// checking Student login--------------> from database ------------------
-app.post('/login_student', async(req,res)=>{
+// checking User login--------------> from database ------------------
+app.post('/login_User', async(req,res)=>{
    try{
          const email =req.body.email;
          const password =req.body.password;
-    const useremail = await Student_R.findOne({email:email});
+    const useremail = await User.findOne({email:email});
 
     const isMatch = await bcrypt.compare(password, useremail.password);
     
@@ -214,7 +214,7 @@ app.post('/login_student', async(req,res)=>{
       });
    
     if(isMatch){
-        res.status(202).render('student');
+        res.status(202).render('User');
        
              
    }
